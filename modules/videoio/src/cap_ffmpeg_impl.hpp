@@ -1579,6 +1579,7 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
       c->bit_rate = 0;
       if (c->priv_data)
           av_opt_set(c->priv_data,"crf","23", 0);
+          av_opt_set(c->priv_data, "preset", "ultrafast", 0);
     }*/
 #endif
 
