@@ -1392,7 +1392,7 @@ static AVFrame * icv_alloc_picture_FFMPEG(int pix_fmt, int width, int height, bo
     picture->width = width;
     picture->height = height;
 
-    size = _opencv_ffmpeg_av_image_get_buffer_size( (AVPixelFormat) pix_fmt, width, height);
+    /*size = _opencv_ffmpeg_av_image_get_buffer_size( (AVPixelFormat) pix_fmt, width, height);
     if(alloc){
         picture_buf = (uint8_t *) malloc(size);
         if (!picture_buf)
@@ -1402,6 +1402,13 @@ static AVFrame * icv_alloc_picture_FFMPEG(int pix_fmt, int width, int height, bo
         }
         _opencv_ffmpeg_av_image_fill_arrays(picture, picture_buf,
                        (AVPixelFormat) pix_fmt, width, height);
+    }*/
+    if (alloc) {
+        int ret = av_image_alloc(picture->data, picture->linesize, picture->width, picture->height, (AVPixelFormat) pix_fmt, 32);
+        if (ret < 0) {
+            fprintf(stderr, "Could not allocate raw picture buffer\n");
+            return NULL;
+        }
     }
     else {
     }
