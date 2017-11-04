@@ -1404,7 +1404,7 @@ static AVFrame * icv_alloc_picture_FFMPEG(int pix_fmt, int width, int height, bo
                        (AVPixelFormat) pix_fmt, width, height);
     }*/
     if (alloc) {
-        int ret = av_image_alloc(picture->data, picture->linesize, picture->width, picture->height, (AVPixelFormat) pix_fmt, 32);
+        int ret = av_image_alloc(picture->data, picture->linesize, picture->width, picture->height, (AVPixelFormat) pix_fmt, 1);
         if (ret < 0) {
             fprintf(stderr, "Could not allocate raw picture buffer\n");
             return NULL;
