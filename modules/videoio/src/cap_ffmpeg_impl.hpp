@@ -387,7 +387,7 @@ inline void _opencv_ffmpeg_av_image_fill_arrays(void *frame, uint8_t *ptr, enum 
 {
 #if LIBAVUTIL_BUILD >= (LIBAVUTIL_VERSION_MICRO >= 100 \
     ? CALC_FFMPEG_VERSION(51, 63, 100) : CALC_FFMPEG_VERSION(54, 6, 0))
-    av_image_fill_arrays(((AVFrame*)frame)->data, ((AVFrame*)frame)->linesize, ptr, pix_fmt, width, height, 1);
+    av_image_fill_arrays(((AVFrame*)frame)->data, ((AVFrame*)frame)->linesize, ptr, pix_fmt, width, height, 16);
 #else
     avpicture_fill((AVPicture*)frame, ptr, pix_fmt, width, height);
 #endif
@@ -1541,7 +1541,7 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
      and qmin since they will be set to reasonable defaults by the libx264
      preset system. Also, use a crf encode with the default quality rating,
      this seems easier than finding an appropriate default bitrate. */
-    if (c->codec_id == AV_CODEC_ID_H264) {
+    /*if (c->codec_id == AV_CODEC_ID_H264) {
       c->gop_size = -1;
       c->qmin = -1;
       c->bit_rate = 0;
@@ -1549,7 +1549,7 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
           av_opt_set(c->priv_data,"crf","23", 0);
           av_opt_set(c->priv_data, "preset", "ultrafast", 0);
       }
-    }
+    }*/
 #endif
 
 #if LIBAVCODEC_VERSION_INT>0x000409
