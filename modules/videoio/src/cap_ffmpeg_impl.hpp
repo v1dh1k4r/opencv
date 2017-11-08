@@ -1373,7 +1373,7 @@ void CvVideoWriter_FFMPEG::init()
  * the following function is a modified version of code
  * found in ffmpeg-0.4.9-pre1/output_example.c
  */
-static AVFrame * icv_alloc_picture_FFMPEG(int pix_fmt, int width, int height, bool alloc)
+static AVFrame * icv_alloc_picture_FFMPEG(int pix_fmt, int width, int height, bool alloc, bool hardwareEncoding)
 {
     AVFrame * picture;
     uint8_t * picture_buf;
@@ -1392,26 +1392,29 @@ static AVFrame * icv_alloc_picture_FFMPEG(int pix_fmt, int width, int height, bo
     picture->width = width;
     picture->height = height;
 
-    /*size = _opencv_ffmpeg_av_image_get_buffer_size( (AVPixelFormat) pix_fmt, width, height);
-    if(alloc){
-        picture_buf = (uint8_t *) malloc(size);
-        if (!picture_buf)
-        {
-            av_free(picture);
-            return NULL;
-        }
-        _opencv_ffmpeg_av_image_fill_arrays(picture, picture_buf,
-                       (AVPixelFormat) pix_fmt, width, height);
-    }*/
-    if (alloc) {
-        int ret = av_image_alloc(picture->data, picture->linesize, picture->width, picture->height, (AVPixelFormat) pix_fmt, 1);
-        if (ret < 0) {
-            fprintf(stderr, "Could not allocate raw picture buffer\n");
-            return NULL;
-        }
+    if(hardwareEncoding) {
+      if (alloc) {
+          int ret = av_image_alloc(picture->data, picture->linesize, picture->width, picture->height, (AVPixelFormat) pix_fmt, 1);
+          if (ret < 0) {
+              fprintf(stderr, "Could not allocate raw picture buffer\n");
+              return NULL;
+          }
+      }
     }
     else {
+      size = _opencv_ffmpeg_av_image_get_buffer_size( (AVPixelFormat) pix_fmt, width, height);
+      if(alloc){
+          picture_buf = (uint8_t *) malloc(size);
+          if (!picture_buf)
+          {
+              av_free(picture);
+              return NULL;
+          }
+          _opencv_ffmpeg_av_image_fill_arrays(picture, picture_buf,
+                         (AVPixelFormat) pix_fmt, width, height);
+      }
     }
+
     return picture;
 }
 
@@ -2033,9 +2036,14 @@ bool CvVideoWriter_FFMPEG::open( const char * filename, int fourcc,
         codec = avcodec_find_encoder_by_name(H264_OMX_CODEC_NAME);
     }
 
+    bool hardwareEncoding = false;
     if(codec == NULL) {
         codec = avcodec_find_encoder(c->codec_id);
     }
+    else {
+      hardwareEncoding = true;
+    }
+
     fprintf(stderr, "[CvVideoWriter_FFMPEG::open] using codec: %s\n", codec->long_name);
 
     if (!codec) {
@@ -2080,7 +2088,7 @@ bool CvVideoWriter_FFMPEG::open( const char * filename, int fourcc,
     need_color_convert = (c->pix_fmt != input_pix_fmt);
 
     /* allocate the encoded raw picture */
-    picture = icv_alloc_picture_FFMPEG(c->pix_fmt, c->width, c->height, need_color_convert);
+    picture = icv_alloc_picture_FFMPEG(c->pix_fmt, c->width, c->height, need_color_convert, hardwareEncoding);
     if (!picture) {
         return false;
     }
@@ -2269,7 +2277,7 @@ AVStream* OutputMediaStream_FFMPEG::addVideoStream(AVFormatContext *oc, CV_CODEC
 {
     AVCodec* codec;
 
-    // Try to use h264_omx encoder instead of h264
+    // Try to use h264_omx encoder instead of h
     if (codec_id == AV_CODEC_ID_H264) {
         codec = avcodec_find_encoder_by_name(H264_OMX_CODEC_NAME);
     }
