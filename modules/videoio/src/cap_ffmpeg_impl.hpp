@@ -285,7 +285,7 @@ inline double get_monotonic_time_diff_ms(timespec time1, timespec time2)
 }
 #endif // USE_AV_INTERRUPT_CALLBACK
 
-#define H264_CODEC_NAME "h264_omx"
+#define H264_OMX_CODEC_NAME "h264_omx"
 
 static int get_number_of_cpus(void)
 {
@@ -1455,9 +1455,13 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
 
     //if(codec_tag) c->codec_tag=codec_tag;
     //codec = avcodec_find_encoder(c->codec_id);
+
+    // Try to use H264_OMX encoder insteaf of h264
     if (c->codec_id == AV_CODEC_ID_H264) {
-        codec = avcodec_find_encoder_by_name(H264_CODEC_NAME);
-    } else {
+        codec = avcodec_find_encoder_by_name(H264_OMX_CODEC_NAME);
+    }
+
+    if(codec == NULL) {
         codec = avcodec_find_encoder(c->codec_id);
     }
 
@@ -2023,9 +2027,13 @@ bool CvVideoWriter_FFMPEG::open( const char * filename, int fourcc,
 
     c->codec_tag = fourcc;
     /* find the video encoder */
+
+    // Try to use h264_omx encoder instead of h264
     if (c->codec_id == AV_CODEC_ID_H264) {
-        codec = avcodec_find_encoder_by_name(H264_CODEC_NAME);
-    } else {
+        codec = avcodec_find_encoder_by_name(H264_OMX_CODEC_NAME);
+    }
+
+    if(codec == NULL) {
         codec = avcodec_find_encoder(c->codec_id);
     }
     fprintf(stderr, "[CvVideoWriter_FFMPEG::open] using codec: %s\n", codec->long_name);
@@ -2260,10 +2268,13 @@ void OutputMediaStream_FFMPEG::close()
 AVStream* OutputMediaStream_FFMPEG::addVideoStream(AVFormatContext *oc, CV_CODEC_ID codec_id, int w, int h, int bitrate, double fps, AVPixelFormat pixel_format)
 {
     AVCodec* codec;
-    if (codec_id == AV_CODEC_ID_H264) {
-        codec = avcodec_find_encoder_by_name(H264_CODEC_NAME);
 
-    } else {
+    // Try to use h264_omx encoder instead of h264
+    if (codec_id == AV_CODEC_ID_H264) {
+        codec = avcodec_find_encoder_by_name(H264_OMX_CODEC_NAME);
+    }
+
+    if(codec == NULL) {
         codec = avcodec_find_encoder(codec_id);
     }
     fprintf(stderr, "[OutputMediaStream_FFMPEG::addVideoStream] using codec: %s\n", codec->long_name);
