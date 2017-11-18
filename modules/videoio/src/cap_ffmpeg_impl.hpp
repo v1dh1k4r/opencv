@@ -1560,7 +1560,7 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
           if(hardwareEncoding) {
             // H264 OMX encoder quality can only be controlled via bit_rate
             // bit_rate = ffmpeg->width * ffmpeg->height * ffmpeg->fps * quality_factor
-            int bitrate = (w * h * fps * 1) >> 7;
+            int bitrate = (w * h * (int)fps * 1) >> 7;
             // Clip bit rate to min
             if (bitrate < 4000) // magic number
                 bitrate= 4000;
