@@ -1460,12 +1460,16 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
     //codec = avcodec_find_encoder(c->codec_id);
 
     // Try to use H264_OMX encoder insteaf of h264
+    bool hardwareEncoding = false;
     if (c->codec_id == AV_CODEC_ID_H264) {
         codec = avcodec_find_encoder_by_name(H264_OMX_CODEC_NAME);
     }
 
     if(codec == NULL) {
         codec = avcodec_find_encoder(c->codec_id);
+    }
+    else {
+      hardwareEncoding = true;
     }
 
     fprintf(stderr, "[icv_add_video_stream_FFMPEG] using codec: %s\n", codec->long_name);
@@ -1553,9 +1557,22 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
       c->qmin = -1;
       c->bit_rate = 0;
       if (c->priv_data) {
-          av_opt_set(c->priv_data,"crf","1", 0);
           av_opt_set(c->priv_data, "preset", "ultrafast", 0);
           av_opt_set(c->priv_data, "tune", "zerolatency", 0);
+
+          if(hardwareEncoding) {
+            // H264 OMX encoder quality can only be controlled via bit_rate
+            // bit_rate = ffmpeg->width * ffmpeg->height * ffmpeg->fps * quality_factor
+            int bitrate = (w * h * fps * 1) >> 7;
+            // Clip bit rate to min
+            if (bitrate < 4000) // magic number
+                bitrate= 4000;
+            c->profile = FF_PROFILE_H264_HIGH;
+            c->bit_rate = bitrate;
+          }
+          else {
+            av_opt_set(c->priv_data, "crf","1", 0);
+          }
       }
     }
 #endif
