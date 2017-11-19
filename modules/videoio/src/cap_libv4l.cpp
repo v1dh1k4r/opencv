@@ -1575,7 +1575,7 @@ static int icvSetVideoSize( CvCaptureCAM_V4L* capture, int w, int h) {
     capture->crop.c.width      = cropWidth;
 
     /* set the crop area, but don't exit if the device don't support croping */
-    xioctl (capture->deviceHandle, VIDIOC_S_CROP, &capture->crop);
+    //xioctl (capture->deviceHandle, VIDIOC_S_CROP, &capture->crop);
 
     CLEAR (capture->form);
     capture->form.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
