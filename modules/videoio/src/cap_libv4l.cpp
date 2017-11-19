@@ -1551,7 +1551,7 @@ static int icvSetVideoSize( CvCaptureCAM_V4L* capture, int w, int h) {
     icvCloseCAM_V4L(capture);
     _capture_V4L2(capture, deviceName);
 
-    int cropHeight;
+    /*int cropHeight;
     int cropWidth;
     switch (capture->mode) {
     case CV_CAP_MODE_GRAY:
