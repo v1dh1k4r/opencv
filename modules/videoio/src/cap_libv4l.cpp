@@ -330,8 +330,8 @@ typedef struct CvCaptureCAM_V4L
    struct v4l2_capability cap;
    struct v4l2_input inp;
    struct v4l2_format form;
-   struct v4l2_crop crop;
-   struct v4l2_cropcap cropcap;
+   //struct v4l2_crop crop;
+   //struct v4l2_cropcap cropcap;
    struct v4l2_requestbuffers req;
    struct v4l2_jpegcompression compr;
    struct v4l2_control control;
@@ -1586,10 +1586,10 @@ static int icvSetVideoSize( CvCaptureCAM_V4L* capture, int w, int h) {
     /* set the values we want to change */
     capture->form.fmt.pix.width = w;
     capture->form.fmt.pix.height = h;
-    capture->form.fmt.win.chromakey = 0;
+    /*capture->form.fmt.win.chromakey = 0;
     capture->form.fmt.win.field = V4L2_FIELD_ANY;
     capture->form.fmt.win.clips = 0;
-    capture->form.fmt.win.clipcount = 0;
+    capture->form.fmt.win.clipcount = 0;*/
     capture->form.fmt.pix.field = V4L2_FIELD_ANY;
 
     /* ask the device to change the size
